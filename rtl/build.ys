@@ -1,0 +1,11 @@
+read_verilog control_decoder.v
+read_verilog forwarding_unit.v
+read_verilog alu_decoder.v
+read_verilog hazard_unit.v
+read_verilog control_path.v
+
+hierarchy -top control_path
+synth_ecp5 -json hardware.json
+opt_clean -purge
+stat
+#show -width -signed -stretch -long -colors 28061389
