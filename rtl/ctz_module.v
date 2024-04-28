@@ -55,28 +55,28 @@ module ctz_encoder #(
     reg [9:0] c;
 
     generate
-        for (i = 0; i < 16; i++) begin
+        for (i = 0; i < 16; i = i + 1) begin
             enc_ctz e1(
                 .d(in[i*2:i*2+1]),
                 .q(encoder_o[i*2:i*2+1])
             );
         end
 
-        for (i = 0; i < 8; i++) begin
+        for (i = 0; i < 8; i = i + 1) begin
             ctzi #(.N(2)) m1 (
                 .d(encoder_o[i*4:i*4+3]),
                 .q(a[i*3:i*3+2])
             );
         end
 
-        for (i = 0; i < 4; i++) begin
+        for (i = 0; i < 4; i = i + 1) begin
             ctzi #(.N(3)) m2 (
                 .d(a[i*6:i*6+5]),
                 .q(b[i*4:i*4+3])
             );
         end
 
-        for (i = 0; i < 2; i++) begin
+        for (i = 0; i < 2; i = i + 1) begin
             ctzi #(.N(4)) m3 (
                 .d(b[i*8:i*8+7]),
                 .q(c[i*5:i*5+4])
