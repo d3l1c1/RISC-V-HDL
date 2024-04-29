@@ -10,6 +10,8 @@ module alu #(
 );
     wire signed [DATA_WIDTH-1:0] a_signed;
     wire signed [DATA_WIDTH-1:0] b_signed;
+    
+    wire [DATA_WIDTH-1:0] reversed_input;
 
     wire [DATA_WIDTH-1:0] cpop_o;
     wire [DATA_WIDTH-1:0] clz_o;
@@ -26,6 +28,13 @@ module alu #(
 
     assign a_signed = a_i;
     assign b_signed = b_i;
+    
+    generate
+        genvar i;
+        for (i = 0; i < 32; i = i + 1) begin
+            assign reversed_input[i] = a_i[DATA_WIDTH-1 - i];
+        end
+    endgenerate
 
     always @* begin
         case (op_i)
@@ -231,8 +240,8 @@ module alu #(
                         .out(clz_o)
                     );
 
-    ctz_encoder #(.DATA_WIDTH(DATA_WIDTH)) ctz_0 (
-                        .in(a_i),
+    clz_encoder #(.DATA_WIDTH(DATA_WIDTH)) ctz_0 (
+                        .in(reversed_input),
                         .out(ctz_o)
                     );
     
