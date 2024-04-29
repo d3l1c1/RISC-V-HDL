@@ -42,49 +42,50 @@ module clzi #
 endmodule // clzi
 
 module clz_encoder #(
-    parameter DATA_WIDTH = 32
+    parameter WIDTH_IN = 32, 
+    parameter WIDTH_OUT = $clog2(WIDTH_IN)+1
 ) (
-    input [DATA_WIDTH-1:0] in,
-    output [DATA_WIDTH-1:0] out
+    input [WIDTH_IN-1:0] in,
+    output [WIDTH_OUT-1:0] out
 );
 
     genvar i;
-    reg [31:0] encoder_o;
-    reg [23:0] a;
-    reg [15:0] b;
-    reg [9:0] c;
+    wire [31:0] encoder_o;
+    wire [23:0] a;
+    wire [15:0] b;
+    wire [9:0] c;
 
     generate
         for (i = 0; i < 16; i = i + 1) begin
             enc e1(
-                .d(in[i*2:i*2+1]),
-                .q(encoder_o[i*2:i*2+1])
+                .d(in[i*2+1:i*2]),
+                .q(encoder_o[i*2+1:i*2])
             );
         end
 
         for (i = 0; i < 8; i = i + 1) begin
             clzi #(.N(2)) m1 (
-                .d(encoder_o[i*4:i*4+3]),
-                .q(a[i*3:i*3+2])
+                .d(encoder_o[i*4+3:i*4]),
+                .q(a[i*3+2:i*3])
             );
         end
 
         for (i = 0; i < 4; i = i + 1) begin
             clzi #(.N(3)) m2 (
-                .d(a[i*6:i*6+5]),
-                .q(b[i*4:i*4+3])
+                .d(a[i*6+5:i*6]),
+                .q(b[i*4+3:i*4])
             );
         end
 
         for (i = 0; i < 2; i = i + 1) begin
             clzi #(.N(4)) m3 (
-                .d(b[i*8:i*8+7]),
-                .q(c[i*5:i*5+4])
+                .d(b[i*8+7:i*8]),
+                .q(c[i*5+4:i*5])
             );
         end
 
         clzi #(.N(5)) m4 (
-                .d(c[0:9]),
+                .d(c[9:0]),
                 .q(out)
             );
     endgenerate
