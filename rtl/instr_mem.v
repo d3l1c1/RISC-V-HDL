@@ -1,54 +1,50 @@
-module instr_mem(
-    clk,
-    rst,
-    read_rq,
-    write_rq,
-    rw_address,
-    write_data,
-    read_data
+module instr_mem #(parameter WADDR = 10)
+(
+    input wire clk,
+    input wire en_a_i,
+    input wire en_b_i,
+    input wire [31:0] data_a_i,
+    input wire [31:0] data_b_i,
+    input wire [WADDR - 1:0] addr_a_i,
+    input wire [WADDR - 1:0] addr_b_i,
+    input wire [3:0] we_a_i,
+    input wire [3:0] we_b_i,
+    output reg [31:0] data_a_o,
+    output reg [31:0] data_b_o
 );
-input           clk;
-input           rst;
-input           read_rq;
-input           write_rq;
-input[5:0]      rw_address;
-input[7:0]      write_data;
-output[7:0]     read_data;
 
-reg[7:0]     read_data;
+reg [7:0] ram_s [(2 ** WADDR) - 1:0];
 
-integer out, i;
-
-// Declare memory 64x8 bits = 512 bits or 64 bytes
-reg [7:0] memory_ram_d [63:0];
-reg [7:0] memory_ram_q [63:0];
-
-// Use positive edge of clock to read the memory
-// Implement cyclic shift right
-always @(posedge clk or
-    negedge rst)
-begin
-    if (!rst)
-    begin
-        for (i=0;i<64; i=i+1)
-            memory_ram_q[i] <= 0;
+// Synchronous Write
+always @(posedge clk) begin
+    if (en_a_i) begin
+        if (we_a_i[3]) ram_s[addr_a_i + 3] <= data_a_i[31:24];
+        if (we_a_i[2]) ram_s[addr_a_i + 2] <= data_a_i[23:16];
+        if (we_a_i[1]) ram_s[addr_a_i + 1] <= data_a_i[15:8];
+        if (we_a_i[0]) ram_s[addr_a_i] <= data_a_i[7:0];
     end
-    else
-    begin
-        for (i=0;i<64; i=i+1)
-             memory_ram_q[i] <= memory_ram_d[i];
+    if (en_b_i) begin
+        if (we_b_i[3]) ram_s[addr_b_i + 3] <= data_b_i[31:24];
+        if (we_b_i[2]) ram_s[addr_b_i + 2] <= data_b_i[23:16];
+        if (we_b_i[1]) ram_s[addr_b_i + 1] <= data_b_i[15:8];
+        if (we_b_i[0]) ram_s[addr_b_i] <= data_b_i[7:0];
     end
 end
 
-
-always @(*)
-begin
-    for (i=0;i<64; i=i+1)
-        memory_ram_d[i] = memory_ram_q[i];
-    if (write_rq && !read_rq)
-        memory_ram_d[rw_address] = write_data;
-    if (!write_rq && read_rq)
-        read_data = memory_ram_q[rw_address];
+// Asynchronous Read
+always @* begin
+    if (en_a_i) begin
+        data_a_o[31:24] = ram_s[addr_a_i + 3];
+        data_a_o[23:16] = ram_s[addr_a_i + 2];
+        data_a_o[15:8] = ram_s[addr_a_i + 1];
+        data_a_o[7:0] = ram_s[addr_a_i];
+    end
+    if (en_b_i) begin
+        data_b_o[31:24] = ram_s[addr_b_i + 3];
+        data_b_o[23:16] = ram_s[addr_b_i + 2];
+        data_b_o[15:8] = ram_s[addr_b_i + 1];
+        data_b_o[7:0] = ram_s[addr_b_i];
+    end
 end
 
 endmodule
