@@ -30,6 +30,10 @@ module data_path(
     input wire[1:0] alu_forward_b_i,
     input wire branch_forward_a_i,
     input wire branch_forward_b_i,
+    
+    // Flags
+    output wire overflow_o,
+    output wire zero_o,
 
     // Flush signal
     input wire if_id_flush_i,
@@ -179,8 +183,8 @@ module data_path(
     reg [68:0] ex_mem_reg;
     reg [31:0] alu_input_a, alu_input_b; // inputs for ALU
     reg [31:0] alu_a_tmp, alu_b_tmp;
+    reg [31:0] alu_a_inv, alu_b_inv;
     wire [31:0] alu_out_s; // ALU output signal
-    wire zero_s, overflow_s;
     
     // Combinational logic of EX phase
     always @(alu_forward_a_i, alu_forward_b_i, id_ex_reg, rd_data_s, mem_fwd_s)
@@ -205,19 +209,41 @@ module data_path(
     begin
         if(pc_operand_i == 1'b1)
         begin
-            alu_input_a = id_ex_reg[132:101];
+            alu_a_inv = id_ex_reg[132:101];
         end
         else begin 
-            alu_input_a = alu_a_tmp;
+            alu_a_inv = alu_a_tmp;
         end
         
         if(alu_src_b_i == 1'b1)
         begin
-            alu_input_b = id_ex_reg[95:64];
+            alu_b_inv = id_ex_reg[95:64];
         end
         else begin 
-            alu_input_b = alu_b_tmp;
+            alu_b_inv = alu_b_tmp;
         end
+    end
+    
+    always @(alu_inverters_i, alu_a_inv, alu_b_inv)
+    begin
+        case(alu_inverters_i)
+            2'b00: begin
+                alu_input_a = alu_a_inv;
+                alu_input_b = alu_b_inv;
+            end
+            2'b01: begin
+                alu_input_a = ~alu_a_inv;
+                alu_input_b = alu_b_inv;
+            end
+            2'b10: begin
+                alu_input_a = alu_a_inv;
+                alu_input_b = ~alu_b_inv;
+            end
+            default: begin
+                alu_input_a = ~alu_a_inv;
+                alu_input_b = alu_b_inv;
+            end
+        endcase
     end
     
     alu alu_module(
@@ -225,9 +251,8 @@ module data_path(
      .b_i(alu_input_b),
      .op_i(alu_op_i),
      .res_o(alu_out_s),
-     .zero_o(zero_s),
-     .of_o(overflow_s),
-     .inverters_i(alu_inverters_i)
+     .zero_o(zero_o),
+     .of_o(overflow_o)
     );
     
     // EX_MEM Register
@@ -246,7 +271,7 @@ module data_path(
     //*********************************************
     // MEMORY ACCESS PHASE
     
-    reg [68:0] mem_wb_reg;
+    reg [36:0] mem_wb_reg;
     wire [31:0] data_mem_o;
     
     // Interface with data memory
@@ -261,12 +286,11 @@ module data_path(
     always @(posedge clk) 
     begin
         if(rst_n == 1'b0) begin
-            mem_wb_reg = 68'b0;
+            mem_wb_reg = 36'b0;
         end
         else begin
             mem_wb_reg[31:0] = ex_mem_reg[31:0];
-            mem_wb_reg[63:32] = data_mem_o;
-            mem_wb_reg[68:64] = ex_mem_reg[68:64];
+            mem_wb_reg[36:32] = ex_mem_reg[68:64];
         end
     end
     
@@ -277,7 +301,7 @@ module data_path(
     always @(mem_wb_reg, mem_to_reg_i)
     begin
         if (mem_to_reg_i) begin
-            rd_data_s = mem_wb_reg[63:32];
+            rd_data_s = data_mem_o;
         end
         else begin
             rd_data_s = mem_wb_reg[31:0];
@@ -285,6 +309,6 @@ module data_path(
     end
     
     // Writing back rd_address
-    assign rd_address_s = mem_wb_reg[68:64];
+    assign rd_address_s = mem_wb_reg[36:32];
     
 endmodule
