@@ -65,32 +65,32 @@ module control_path(
     always @(posedge clk) 
     begin
         if(rst_n == 1'b1) begin
-            id_ex_reg = 36'b000000000000000000000000000000000000;
+            id_ex_reg <= 36'b000000000000000000000000000000000000;
         end
         else begin
 
             // TODO: CLEAN =>  remove rs1 and rs2 in use sigs
 
             if(control_pass_s == 1'b1) begin
-                id_ex_reg[0] = control_pass_s;
-                id_ex_reg[1] = mem_to_reg_s;
-                id_ex_reg[3:2] = data_mem_we_s;
-                id_ex_reg[4] = rd_we_s;
-                id_ex_reg[5] = alu_src_b_s;
-                id_ex_reg[6] = branch_s;
-                id_ex_reg[8:7] = alu_2bit_op_s;
-                id_ex_reg[9] = rs1_in_use_s;
-                id_ex_reg[10] = rs2_in_use_s;
-                id_ex_reg[11] = pc_operand_s;
-                id_ex_reg[14:12] = instruction_i[14:12]; // funct3
-                id_ex_reg[21:15] = instruction_i[31:25]; // funct7
-                id_ex_reg[26:22] = instruction_i[11:7]; // rd
-                id_ex_reg[31:27] = instruction_i[19:15]; // rs1
-                id_ex_reg[36:32] = instruction_i[24:20]; // rs2
+                id_ex_reg[0] <= control_pass_s;
+                id_ex_reg[1] <= mem_to_reg_s;
+                id_ex_reg[3:2] <= data_mem_we_s;
+                id_ex_reg[4] <= rd_we_s;
+                id_ex_reg[5] <= alu_src_b_s;
+                id_ex_reg[6] <= branch_s;
+                id_ex_reg[8:7] <= alu_2bit_op_s;
+                id_ex_reg[9] <= rs1_in_use_s;
+                id_ex_reg[10] <= rs2_in_use_s;
+                id_ex_reg[11] <= pc_operand_s;
+                id_ex_reg[14:12] <= instruction_i[14:12]; // funct3
+                id_ex_reg[21:15] <= instruction_i[31:25]; // funct7
+                id_ex_reg[26:22] <= instruction_i[11:7]; // rd
+                id_ex_reg[31:27] <= instruction_i[19:15]; // rs1
+                id_ex_reg[36:32] <= instruction_i[24:20]; // rs2
             end
             else
             begin
-                id_ex_reg = 36'b000000000000000000000000000000000000;  
+                id_ex_reg <= 36'b000000000000000000000000000000000000;  
             end
         end
 
@@ -131,13 +131,13 @@ module control_path(
     always @(posedge clk) 
     begin
         if(rst_n == 1'b1) begin
-            ex_mem_reg = 9'b000000000;
+            ex_mem_reg <= 9'b000000000;
         end
         else begin
-            ex_mem_reg[0] = id_ex_reg[1]; // mem_to_reg
-            ex_mem_reg[2:1] = id_ex_reg[3:2]; // data_mem_we
-            ex_mem_reg[3] = id_ex_reg[4]; // rd_we
-            ex_mem_reg[8:4] = id_ex_reg[26:22]; // rd
+            ex_mem_reg[0] <= id_ex_reg[1]; // mem_to_reg
+            ex_mem_reg[2:1] <= id_ex_reg[3:2]; // data_mem_we
+            ex_mem_reg[3] <= id_ex_reg[4]; // rd_we
+            ex_mem_reg[8:4] <= id_ex_reg[26:22]; // rd
         end
 
     end
@@ -149,12 +149,12 @@ module control_path(
     always @(posedge clk) 
     begin
         if(rst_n == 1'b1) begin
-            mem_wb_reg = 7'b0000000;
+            mem_wb_reg <= 7'b0000000;
         end
         else begin
-            mem_wb_reg[0] = ex_mem_reg[0]; // mem_to_reg
-            mem_wb_reg[5:1] = ex_mem_reg[8:4]; // rd
-            mem_wb_reg[6] = ex_mem_reg[3]; // rd_we
+            mem_wb_reg[0] <= ex_mem_reg[0]; // mem_to_reg
+            mem_wb_reg[5:1] <= ex_mem_reg[8:4]; // rd
+            mem_wb_reg[6] <= ex_mem_reg[3]; // rd_we
         end
 
     end

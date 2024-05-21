@@ -56,7 +56,7 @@ module data_path(
     // Combinational logic in IF phase
     always @(jump_address, pc_inc_o, pc_next_sel_i)
     begin
-        if(pc_next_sel_i) begin
+        if(pc_next_sel_i == 1'b0) begin
             mux_sel_o = pc_inc_o;
         end
         else begin
@@ -64,17 +64,17 @@ module data_path(
         end
     end
     
-    assign pc_inc_o = pc_o + 4;
+    assign pc_inc_o = pc_o + 1; // return to +4
     
     // Program counter
     always @(posedge clk) 
     begin
         if (rst == 1'b1) begin
-            pc_o = 32'b0;
+            pc_o <= 32'b0;
         end
-        else if (rst == 1'b1) begin
+        else begin
             if(pc_en_i == 1'b1) begin
-                pc_o = mux_sel_o;
+                pc_o <= mux_sel_o;
             end
         end
     end
@@ -86,15 +86,15 @@ module data_path(
     always @(posedge clk) 
     begin
         if(rst == 1'b1) begin
-            if_id_reg = 64'b0;
+            if_id_reg <= 64'b0;
         end
         else begin
             if (if_id_flush_i == 1'b1) begin
-                if_id_reg = 32'b0;
+                if_id_reg <= 32'b0;
             end
             else begin
                 if (if_id_en_i == 1'b1) begin
-                    if_id_reg = pc_o;
+                    if_id_reg <= pc_o;
                 end
             end
         end
@@ -166,14 +166,14 @@ module data_path(
     always @(posedge clk) 
     begin
         if(rst == 1'b1) begin
-            id_ex_reg = 132'b0;
+            id_ex_reg <= 132'b0;
         end
         else begin
-            id_ex_reg[31:0] = rs1_data_s;
-            id_ex_reg[63:32] = rs2_data_s;
-            id_ex_reg[95:64] = imm_o;
-            id_ex_reg[100:96] = instr_mem_o[11:7];
-            id_ex_reg[132:101] = if_id_reg;
+            id_ex_reg[31:0] <= rs1_data_s;
+            id_ex_reg[63:32] <= rs2_data_s;
+            id_ex_reg[95:64] <= imm_o;
+            id_ex_reg[100:96] <= instr_mem_o[11:7];
+            id_ex_reg[132:101] <= if_id_reg;
         end
     end
     
@@ -262,12 +262,12 @@ module data_path(
     always @(posedge clk) 
     begin
         if(rst == 1'b1) begin
-            ex_mem_reg = 68'b0;
+            ex_mem_reg <= 68'b0;
         end
         else begin
-            ex_mem_reg[31:0] = alu_out_s;
-            ex_mem_reg[63:32] = id_ex_reg[63:32];
-            ex_mem_reg[68:64] = id_ex_reg[100:96];
+            ex_mem_reg[31:0] <= alu_out_s;
+            ex_mem_reg[63:32] <= id_ex_reg[63:32];
+            ex_mem_reg[68:64] <= id_ex_reg[100:96];
         end
     end
     
@@ -289,11 +289,11 @@ module data_path(
     always @(posedge clk) 
     begin
         if(rst == 1'b1) begin
-            mem_wb_reg = 36'b0;
+            mem_wb_reg <= 36'b0;
         end
         else begin
-            mem_wb_reg[31:0] = ex_mem_reg[31:0];
-            mem_wb_reg[36:32] = ex_mem_reg[68:64];
+            mem_wb_reg[31:0] <= ex_mem_reg[31:0];
+            mem_wb_reg[36:32] <= ex_mem_reg[68:64];
         end
     end
     
