@@ -16,6 +16,7 @@ module control_path(
     output wire pc_next_sel_o,
     output reg[3:0] data_mem_we_o,
     output wire pc_operand_o,
+    output wire [1:0]alu_inverters_o,
 
     // signals utilized in forwarding
     output wire[1:0] alu_forward_a_o,
@@ -63,7 +64,7 @@ module control_path(
 
     always @(posedge clk) 
     begin
-        if(rst_n == 1'b0) begin
+        if(rst_n == 1'b1) begin
             id_ex_reg = 36'b000000000000000000000000000000000000;
         end
         else begin
@@ -123,12 +124,13 @@ module control_path(
         .funct3_i(id_ex_reg[14:12]),
         .funct7_i(id_ex_reg[21:15]),
         .rs_2_i(id_ex_reg[36:32]),
-        .alu_op_o(alu_op_o)
+        .alu_op_o(alu_op_o),
+        .alu_inverters(alu_inverters_o)
     );
 
     always @(posedge clk) 
     begin
-        if(rst_n == 1'b0) begin
+        if(rst_n == 1'b1) begin
             ex_mem_reg = 9'b000000000;
         end
         else begin
@@ -146,7 +148,7 @@ module control_path(
 
     always @(posedge clk) 
     begin
-        if(rst_n == 1'b0) begin
+        if(rst_n == 1'b1) begin
             mem_wb_reg = 7'b0000000;
         end
         else begin
