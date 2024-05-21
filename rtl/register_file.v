@@ -31,7 +31,7 @@ module reg_file #(
     assign rs2_data_o = mem[rs2_address_i];
 
     always @(posedge clk) begin
-        if (rst == 1'b0) begin
+        if (rst == 1'b1) begin
             for (i = 0; i < NUMBER_OF_REGISTERS; i = i + 1) begin
                 mem[i] <= {(DATA_WIDTH){1'b0}}; // Resetting register file
             end

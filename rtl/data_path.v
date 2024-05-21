@@ -1,7 +1,7 @@
 module data_path(
     // Inputs from top module
     input wire clk,
-    input wire rst_n,
+    input wire rst,
     
     // Inputs from controlpath
     input wire mem_to_reg_i,
@@ -50,14 +50,12 @@ module data_path(
     reg [31:0] pc_o;
     reg [31:0] mux_sel_o;
     reg [31:0] jump_address;
-    reg [31:0] pc_inc_o;
+    wire [31:0] pc_inc_o;
     wire [31:0] instr_mem_o;
     
     // Combinational logic in IF phase
-    always @(jump_address, pc_inc_o, pc_next_sel_i, pc_o)
+    always @(jump_address, pc_inc_o, pc_next_sel_i)
     begin
-        pc_inc_o = pc_o + 4;
-        
         if(pc_next_sel_i) begin
             mux_sel_o = pc_inc_o;
         end
@@ -66,13 +64,15 @@ module data_path(
         end
     end
     
+    assign pc_inc_o = pc_o + 4;
+    
     // Program counter
     always @(posedge clk) 
     begin
-        if (rst_n == 1'b1) begin
+        if (rst == 1'b1) begin
             pc_o = 32'b0;
         end
-        else if (rst_n == 1'b0) begin
+        else if (rst == 1'b1) begin
             if(pc_en_i == 1'b1) begin
                 pc_o = mux_sel_o;
             end
@@ -85,7 +85,7 @@ module data_path(
     // IF-ID Register
     always @(posedge clk) 
     begin
-        if(rst_n == 1'b0) begin
+        if(rst == 1'b1) begin
             if_id_reg = 64'b0;
         end
         else begin
@@ -112,7 +112,7 @@ module data_path(
     
     reg_file register_file (
         .clk(clk),
-        .rst(rst_n),
+        .rst(rst),
         .rs1_address_i(instr_mem_o[19:15]),
         .rs1_data_o(rs1_data_s),
         .rs2_address_i(instr_mem_o[24:20]),
@@ -165,7 +165,7 @@ module data_path(
     // ID_EX Register
     always @(posedge clk) 
     begin
-        if(rst_n == 1'b0) begin
+        if(rst == 1'b1) begin
             id_ex_reg = 132'b0;
         end
         else begin
@@ -207,6 +207,7 @@ module data_path(
     // Second multiplexers before ALU
     always @(alu_src_b_i, id_ex_reg, alu_b_tmp, alu_a_tmp, pc_operand_i)
     begin
+        // Used for AUIPC
         if(pc_operand_i == 1'b1)
         begin
             alu_a_inv = id_ex_reg[132:101];
@@ -215,6 +216,7 @@ module data_path(
             alu_a_inv = alu_a_tmp;
         end
         
+        //Used for immediate instructions
         if(alu_src_b_i == 1'b1)
         begin
             alu_b_inv = id_ex_reg[95:64];
@@ -224,6 +226,7 @@ module data_path(
         end
     end
     
+    // Combinational logic for inverting ALU inputs
     always @(alu_inverters_i, alu_a_inv, alu_b_inv)
     begin
         case(alu_inverters_i)
@@ -258,7 +261,7 @@ module data_path(
     // EX_MEM Register
     always @(posedge clk) 
     begin
-        if(rst_n == 1'b0) begin
+        if(rst == 1'b1) begin
             ex_mem_reg = 68'b0;
         end
         else begin
@@ -285,7 +288,7 @@ module data_path(
     // MEM_WB Register
     always @(posedge clk) 
     begin
-        if(rst_n == 1'b0) begin
+        if(rst == 1'b1) begin
             mem_wb_reg = 36'b0;
         end
         else begin
