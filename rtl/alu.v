@@ -4,7 +4,7 @@ module alu #(
     input [DATA_WIDTH-1:0] a_i,
     input [DATA_WIDTH-1:0] b_i,
     input [4:0] op_i,
-    output reg[DATA_WIDTH-1:0] res_o,
+    output reg [DATA_WIDTH-1:0] res_o,
     output zero_o,
     output of_o
 );
@@ -235,12 +235,12 @@ module alu #(
         endcase
     end
 
-    clz_encoder #(.DATA_WIDTH(DATA_WIDTH)) clz_0 (
+    clz_encoder #(.WIDTH_IN(DATA_WIDTH)) clz_0 (
                         .in(a_i),
                         .out(clz_o)
                     );
 
-    clz_encoder #(.DATA_WIDTH(DATA_WIDTH)) ctz_0 (
+    clz_encoder #(.WIDTH_IN(DATA_WIDTH)) ctz_0 (
                         .in(reversed_input),
                         .out(ctz_o)
                     );

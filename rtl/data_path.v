@@ -81,7 +81,7 @@ module data_path(
     
     assign instr_mem_address_o = pc_o;
     
-   always @(posedge clk or posedge rst) begin
+   always @(posedge clk) begin
         if (rst) begin
             instr_mem_o <= 32'b0;
         end else if (if_id_flush_i) begin

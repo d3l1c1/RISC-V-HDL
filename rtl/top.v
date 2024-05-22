@@ -11,7 +11,6 @@ module top(
     
     wire [31:0] instr_mem_address_s;
     wire [31:0] instr_mem_read_s;
-    wire instr_mem_en_s;
     wire [3:0] data_mem_we_s;
     wire [31:0] data_mem_address_s;
     wire [31:0] data_mem_write_s;

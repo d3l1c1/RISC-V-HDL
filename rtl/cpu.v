@@ -35,14 +35,12 @@ module cpu(
     wire branch_forward_b_s;
     wire if_id_flush_s;
     wire pc_en_s;
-    wire if_id_en_s;
-    
     
     data_path d_path( 
     // Inputs from top module
     
     .clk(clk),
-    .rst_n(reset),
+    .rst(reset),
     
     // Inputs from controlpath
     .mem_to_reg_i(mem_to_reg_s),
