@@ -96,6 +96,18 @@ module control_decoder(
                 rs2_in_use_o = 1'b0;
                 pc_operand_o  = 1'b1; 
             end
+        7'b1101111: // JAL
+            begin
+                mem_to_reg_o = 1'b0;
+                data_mem_we_o = 2'b00;
+                rd_we_o = 1'b1;
+                alu_src_b_o = 1'b1; // pass imm
+                branch_o = 1'b1;
+                alu_2bit_op_o = 2'b00;
+                rs1_in_use_o = 1'b0;
+                rs2_in_use_o = 1'b0;
+                pc_operand_o  = 1'b0;
+            end
         7'b0010111: // AUIPC
             begin
                 mem_to_reg_o = 1'b0;

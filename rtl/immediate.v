@@ -33,7 +33,7 @@ module immediate (
                         immediate_extended_o = {20'b11111111111111111111, instruction_i[31:25], instruction_i[11:7]};
                     end
                 end
-            7'b0100011: // LUI, AUIPC
+            7'b0110111: // LUI, AUIPC
                 begin
                     if(instruction_i[31] == 1'b0) begin
                         immediate_extended_o = {12'b000000000000, instruction_i[31:12]};
@@ -42,7 +42,7 @@ module immediate (
                         immediate_extended_o = {12'b111111111111, instruction_i[31:12]};
                     end
                 end
-            7'b0100011: // JAL
+            7'b1101111: // JAL
                 begin
                     if(instruction_i[31] == 1'b0) begin
                         immediate_extended_o = {11'b00000000000, instruction_i[31], instruction_i[19:12], instruction_i[20], instruction_i[30:21], 1'b0};

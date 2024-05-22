@@ -37,7 +37,9 @@ module reg_file #(
             end
         end
         else if (rd_we_i == 1'b1) begin
-            mem[rd_address_i] <= rd_data_i;
+            if(rd_address_i != 5'b0) begin
+                mem[rd_address_i] <= rd_data_i;
+            end
         end
     end
 endmodule

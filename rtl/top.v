@@ -11,6 +11,7 @@ module top(
     
     wire [31:0] instr_mem_address_s;
     wire [31:0] instr_mem_read_s;
+    wire instr_mem_en_s;
     wire [3:0] data_mem_we_s;
     wire [31:0] data_mem_address_s;
     wire [31:0] data_mem_write_s;
@@ -34,20 +35,19 @@ module top(
         .data_mem_address_o(data_mem_address_s),
         .data_mem_write_o(data_mem_write_s),
         .data_mem_read_i(data_mem_read_s)
-    
     );
     
   bram_module #(
-    .RAM_PERFORMANCE("HIGH_PERFORMANCE"), // Select "HIGH_PERFORMANCE" or "LOW_LATENCY" 
-    .INIT_FILE("/home/lazar/risc_test/instr.txt")                        // Specify name/location of RAM initialization file if using one (leave blank if not)
+    .RAM_PERFORMANCE("LOW_LATENCY"), // Select "HIGH_PERFORMANCE" or "LOW_LATENCY" 
+    .INIT_FILE("C:\\Users\\Win 10\\Desktop\\ftn\\projekat\\rtl\\project_zybo\\project_zybo.srcs\\sim_1\\new\\asm.v")    // Specify name/location of RAM initialization file if using one (leave blank if not)
   ) instruction_memory (
-    .addra(instr_mem_address_s),   // Port A address bus, width determined from RAM_DEPTH
+    .addra(instr_mem_address_s >> 2),   // Port A address bus, width determined from RAM_DEPTH
     .addrb(),   // Port B address bus, width determined from RAM_DEPTH
     .dina(),     // Port A RAM input data, width determined from RAM_WIDTH
     .dinb(),     // Port B RAM input data, width determined from RAM_WIDTH
     .clka(clk),     // Clock
-    .wea(1'b0),       // Port A write enable
-    .web(1'b0),       // Port B write enable
+    .wea(4'b0),       // Port A write enable
+    .web(4'b0),       // Port B write enable
     .ena(1'b1),       // Port A RAM Enable, for additional power savings, disable port when not in use
     .enb(),       // Port B RAM Enable, for additional power savings, disable port when not in use
     .rsta(reset),     // Port A output reset (does not affect memory contents)
@@ -59,16 +59,16 @@ module top(
   );
   
     bram_module #(
-    .RAM_PERFORMANCE("HIGH_PERFORMANCE"), // Select "HIGH_PERFORMANCE" or "LOW_LATENCY" 
+    .RAM_PERFORMANCE("LOW_LATENCY"), // Select "HIGH_PERFORMANCE" or "LOW_LATENCY" 
     .INIT_FILE("")                        // Specify name/location of RAM initialization file if using one (leave blank if not)
   ) data_memory (
-    .addra(data_mem_address_s),   // Port A address bus, width determined from RAM_DEPTH
+    .addra(data_mem_address_s >> 2),   // Port A address bus, width determined from RAM_DEPTH
     .addrb(),   // Port B address bus, width determined from RAM_DEPTH
     .dina(data_mem_write_s),     // Port A RAM input data, width determined from RAM_WIDTH
     .dinb(),     // Port B RAM input data, width determined from RAM_WIDTH
     .clka(clk),     // Clock
-    .wea(data_mem_we_s[0]),       // Port A write enable /* JUST FOR SMOKE TEST*/
-    .web(1'b0),       // Port B write enable
+    .wea(data_mem_we_s),       // Port A write enable /* JUST FOR SMOKE TEST*/
+    .web(4'b0),       // Port B write enable
     .ena(1'b1),       // Port A RAM Enable, for additional power savings, disable port when not in use
     .enb(1'b0),       // Port B RAM Enable, for additional power savings, disable port when not in use
     .rsta(reset),     // Port A output reset (does not affect memory contents)

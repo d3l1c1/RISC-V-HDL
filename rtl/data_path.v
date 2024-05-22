@@ -51,7 +51,7 @@ module data_path(
     reg [31:0] mux_sel_o;
     reg [31:0] jump_address;
     wire [31:0] pc_inc_o;
-    wire [31:0] instr_mem_o;
+    reg [31:0] instr_mem_o;
     
     // Combinational logic in IF phase
     always @(jump_address, pc_inc_o, pc_next_sel_i)
@@ -64,7 +64,7 @@ module data_path(
         end
     end
     
-    assign pc_inc_o = pc_o + 1; // return to +4
+    assign pc_inc_o = pc_o + 4; // return to +4
     
     // Program counter
     always @(posedge clk) 
@@ -80,7 +80,16 @@ module data_path(
     end
     
     assign instr_mem_address_o = pc_o;
-    assign instr_mem_o = instr_mem_read_i; 
+    
+   always @(posedge clk or posedge rst) begin
+        if (rst) begin
+            instr_mem_o <= 32'b0;
+        end else if (if_id_flush_i) begin
+            instr_mem_o <= 32'b0;
+        end else begin
+            instr_mem_o <= instr_mem_read_i;
+        end
+    end
     
     // IF-ID Register
     always @(posedge clk) 
@@ -156,7 +165,7 @@ module data_path(
     
     // Logic for calculating branching address
     always @(imm_o, if_id_reg) begin
-        jump_address = (imm_o << 1) + if_id_reg;
+        jump_address = (imm_o + if_id_reg);
     end
     
     // Comparator
