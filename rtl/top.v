@@ -9,12 +9,17 @@ module top(
 
     );
     
+    wire [31:0] instr_mem_addr_tmp;
     wire [31:0] instr_mem_address_s;
     wire [31:0] instr_mem_read_s;
+    wire if_id_en_s;
+    wire if_id_flush_s;
     wire [3:0] data_mem_we_s;
     wire [31:0] data_mem_address_s;
     wire [31:0] data_mem_write_s;
     wire [31:0] data_mem_read_s;
+    
+    assign instr_mem_address_s = if_id_flush_s ? 32'b0 : (instr_mem_addr_tmp >> 2);
     
     cpu risc_v_imb(
     
@@ -24,10 +29,12 @@ module top(
         .reset(reset),
         .overflow_o(overflow_o),
         .zero_o(zero_o),
+        .if_id_flush_o(if_id_flush_s),
         
         // CPU interface towards memories in top module
        
-        .instr_mem_address_o(instr_mem_address_s),
+        .instr_mem_address_o(instr_mem_addr_tmp),
+        .if_id_en_o(if_id_en_s),
         .instr_mem_read_i(instr_mem_read_s),
         
         .data_mem_we_o(data_mem_we_s),
@@ -40,14 +47,14 @@ module top(
     .RAM_PERFORMANCE("LOW_LATENCY"), // Select "HIGH_PERFORMANCE" or "LOW_LATENCY" 
     .INIT_FILE("C:\\Users\\Win 10\\Desktop\\ftn\\projekat\\rtl\\project_zybo\\project_zybo.srcs\\sim_1\\new\\asm.v")    // Specify name/location of RAM initialization file if using one (leave blank if not)
   ) instruction_memory (
-    .addra(instr_mem_address_s >> 2),   // Port A address bus, width determined from RAM_DEPTH
+    .addra(instr_mem_address_s),   // Port A address bus, width determined from RAM_DEPTH
     .addrb(),   // Port B address bus, width determined from RAM_DEPTH
     .dina(),     // Port A RAM input data, width determined from RAM_WIDTH
     .dinb(),     // Port B RAM input data, width determined from RAM_WIDTH
     .clka(clk),     // Clock
     .wea(4'b0),       // Port A write enable
     .web(4'b0),       // Port B write enable
-    .ena(1'b1),       // Port A RAM Enable, for additional power savings, disable port when not in use
+    .ena(if_id_en_s),       // Port A RAM Enable, for additional power savings, disable port when not in use
     .enb(),       // Port B RAM Enable, for additional power savings, disable port when not in use
     .rsta(reset),     // Port A output reset (does not affect memory contents)
     .rstb(reset),     // Port B output reset (does not affect memory contents)
