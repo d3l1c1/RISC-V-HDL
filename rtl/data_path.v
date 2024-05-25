@@ -193,7 +193,7 @@ module data_path(
     wire [31:0] alu_out_s; // ALU output signal
     
     // Combinational logic of EX phase
-    always @(alu_forward_a_i, alu_forward_b_i, id_ex_reg, rd_data_s, mem_fwd_s)
+    always @*
     begin
         case(alu_forward_a_i)
             2'b00: alu_a_tmp = id_ex_reg[31:0];
@@ -307,7 +307,7 @@ module data_path(
     // WRITE BACK PHASE
     
     // WB multiplexer for rd_data
-    always @(mem_wb_reg, mem_to_reg_i)
+    always @*
     begin
         if (mem_to_reg_i) begin
             rd_data_s = data_mem_o;
