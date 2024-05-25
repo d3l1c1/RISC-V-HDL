@@ -89,12 +89,12 @@ module data_path(
             if_id_reg <= 64'b0;
         end
         else begin
-            if (if_id_flush_i == 1'b1) begin
-                if_id_reg <= 32'b0;
-            end
-            else begin
-                if (if_id_en_i == 1'b1) begin
-                    if_id_reg <= pc_o;
+            if (if_id_en_i == 1'b1) begin
+                if (if_id_flush_i == 1'b1) begin
+                    if_id_reg <= 32'b0;
+                end
+                else begin
+                    if_id_reg <= pc_o;     
                 end
             end
         end
@@ -135,7 +135,7 @@ module data_path(
     assign instruction_o = instr_mem_o;
     
     // Multiplexers used for forwarding
-    always @(branch_forward_a_i, rs1_data_s, branch_forward_b_i, rs2_data_s) 
+    always @*
     begin
         if(branch_forward_a_i == 1'b1)
         begin
@@ -159,11 +159,7 @@ module data_path(
         jump_address = (imm_o + if_id_reg);
     end
     
-    // Comparator
-    //assign branch_condition_o = mux_a_res == mux_b_res ? 1'b1 : 1'b0;
-    
-    // New branching module to cover all types of branches
-    
+    // Branching module to cover all types of branches
     branch_module branch(
         .operand1(mux_a_res),
         .operand2(mux_b_res),
@@ -171,7 +167,6 @@ module data_path(
         .funct3_i(instr_mem_o[14:12]),
         .branch_condition_o(branch_condition_o)
     );
-    
     
     // ID_EX Register
     always @(posedge clk) 
