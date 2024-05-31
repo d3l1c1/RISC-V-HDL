@@ -77,13 +77,12 @@ module branch_module(
            end
            
            // JAL and JALR
-           else if(opcode_i == 7'b1100111 || opcode_i == 7'b1101111) begin
-                branch_o = 1'b1;
-           end else
+           else if(opcode_i == 7'b1100111 || opcode_i == 7'b1101111)
            begin
-           
+                branch_o = 1'b1;
+           end 
+           else begin          
                 branch_o = 1'b0;
-           
            end
             
     end

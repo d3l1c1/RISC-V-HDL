@@ -38,6 +38,7 @@ module cpu(
     wire if_id_flush_s;
     wire pc_en_s;
     wire if_id_en_s;
+    wire jalr_operand_s;
     
     assign if_id_en_o = if_id_en_s;
     assign if_id_flush_o = if_id_flush_s;
@@ -55,6 +56,7 @@ module cpu(
     .rd_we_i(rd_we_s),
     .pc_next_sel_i(pc_next_sel_s),
     .pc_operand_i(pc_operand_s),
+    .jalr_operand_i(jalr_operand_s),
     .alu_inverters_i(alu_inverters_s),
 
     // Outputs to controlpath
@@ -105,6 +107,7 @@ module cpu(
     .pc_next_sel_o(pc_next_sel_s),
     .data_mem_we_o(data_mem_we_o),
     .pc_operand_o(pc_operand_s),
+    .jalr_operand_o(jalr_operand_s),
     .alu_inverters_o(alu_inverters_s),
 
     // signals utilized in forwarding

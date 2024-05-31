@@ -16,6 +16,7 @@ module control_path(
     output wire pc_next_sel_o,
     output reg[3:0] data_mem_we_o,
     output wire pc_operand_o,
+    output wire jalr_operand_o,
     output wire [1:0]alu_inverters_o,
 
     // signals utilized in forwarding
@@ -95,7 +96,8 @@ module control_path(
         end
 
     end
-
+    
+    assign jalr_operand_o = pc_operand_s;
     assign alu_src_b_o = id_ex_reg[5];
     assign pc_operand_o = id_ex_reg[11];
     assign pc_next_sel_o = branch_condition_i & branch_s;

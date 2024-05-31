@@ -10,6 +10,7 @@ module data_path(
     input wire rd_we_i,
     input wire pc_next_sel_i,
     input wire pc_operand_i,
+    input wire jalr_operand_i,
     input wire [1:0] alu_inverters_i,
 
     // Outputs to controlpath
@@ -54,7 +55,7 @@ module data_path(
     wire [31:0] instr_mem_o;
     
     // Combinational logic in IF phase
-    always @(jump_address, pc_inc_o, pc_next_sel_i)
+    always @*
     begin
         if(pc_next_sel_i == 1'b0) begin
             mux_sel_o = pc_inc_o;
@@ -155,8 +156,14 @@ module data_path(
     end
     
     // Logic for calculating branching address
-    always @(imm_o, if_id_reg) begin
-        jump_address = (imm_o + if_id_reg);
+    always @*
+    begin
+        if (jalr_operand_i == 1'b0) begin
+            jump_address = (imm_o + if_id_reg);
+        end
+        else begin
+            jump_address = (imm_o + rs1_data_s);    // JALR instruction
+        end
     end
     
     // Branching module to cover all types of branches
@@ -211,7 +218,7 @@ module data_path(
     end
     
     // Second multiplexers before ALU
-    always @(alu_src_b_i, id_ex_reg, alu_b_tmp, alu_a_tmp, pc_operand_i)
+    always @*
     begin
         // Used for AUIPC
         if(pc_operand_i == 1'b1)
@@ -233,7 +240,7 @@ module data_path(
     end
     
     // Combinational logic for inverting ALU inputs
-    always @(alu_inverters_i, alu_a_inv, alu_b_inv)
+    always @*
     begin
         case(alu_inverters_i)
             2'b00: begin
