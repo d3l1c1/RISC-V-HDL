@@ -14,7 +14,7 @@ module branch_module(
     reg branch_o;
     
     wire signed [31:0] op1_s, op2_s;
-    wire unsigned [31:0] op1_i, op2_u;
+    wire [31:0] op1_i, op2_u;
     
     assign op1_s = operand1;
     assign op2_s = operand2;
@@ -76,9 +76,13 @@ module branch_module(
            
            end
            
-           else begin
+           // JAL and JALR
+           else if(opcode_i == 7'b1100111 || opcode_i == 7'b1101111) begin
+                branch_o = 1'b1;
+           end else
+           begin
            
-            branch_o = 1'b0;
+                branch_o = 1'b0;
            
            end
             
