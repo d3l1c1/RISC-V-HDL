@@ -268,7 +268,8 @@ module data_path(
      .op_i(alu_op_i),
      .res_o(alu_out_s),
      .zero_o(zero_o),
-     .of_o(overflow_o)
+     .of_o(overflow_o),
+     .clk(clk)
     );
     
     // EX_MEM Register

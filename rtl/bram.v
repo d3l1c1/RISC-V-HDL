@@ -116,8 +116,8 @@ endmodule
   bram_module #(
     .NB_COL(4),                           // Specify number of columns (number of bytes)
     .COL_WIDTH(8),                        // Specify column width (byte width, typically 8 or 9)
-    .RAM_DEPTH(1024),                     // Specify RAM depth (number of entries)
-    .RAM_PERFORMANCE("HIGH_PERFORMANCE"), // Select "HIGH_PERFORMANCE" or "LOW_LATENCY" 
+    .RAM_DEPTH(32768),                     // Specify RAM depth (number of entries)
+    .RAM_PERFORMANCE("LOW_LATENCY"), // Select "HIGH_PERFORMANCE" or "LOW_LATENCY" 
     .INIT_FILE("")                        // Specify name/location of RAM initialization file if using one (leave blank if not)
   ) your_instance_name (
     .addra(addra),   // Port A address bus, width determined from RAM_DEPTH

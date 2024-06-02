@@ -4,7 +4,8 @@ module alu #(
     input [DATA_WIDTH-1:0] a_i,
     input [DATA_WIDTH-1:0] b_i,
     input [4:0] op_i,
-    output reg [DATA_WIDTH-1:0] res_o,
+    input clk,
+    output reg[DATA_WIDTH-1:0] res_o,
     output zero_o,
     output of_o
 );
@@ -14,8 +15,8 @@ module alu #(
     wire [DATA_WIDTH-1:0] reversed_input;
 
     wire [DATA_WIDTH-1:0] cpop_o;
-    wire [DATA_WIDTH-1:0] clz_o;
-    wire [DATA_WIDTH-1:0] ctz_o;
+    wire [5:0] clz_o;
+    wire [5:0] ctz_o;
 
     reg [7:0] byte0;
     reg [7:0] byte1;
@@ -25,6 +26,8 @@ module alu #(
     reg [15:0] LSH;
 
     reg [2*DATA_WIDTH-1:0] tmp2Xlen;
+    
+    wire [63:0] mul_res_s;
 
     assign a_signed = a_i;
     assign b_signed = b_i;
@@ -90,23 +93,27 @@ module alu #(
                 end
             5'b01010:   //mul
                 begin
-                    res_o = a_signed * b_signed;
+                    res_o = mul_res_s[31:0];
                 end
+                
+                //In this implementation sign is taken care of so 
+                // basically all hig muls are same 
+                
             5'b01011:   //mulh
                 begin
-                    tmp2Xlen = a_signed * b_signed;
-                    res_o = tmp2Xlen[63:32];
+                    res_o = mul_res_s[63:32];
                 end
-            5'b01100:   //mulhsu
+            5'b01100:   //mulhsu I
                 begin
-                    tmp2Xlen = a_signed * b_i;
-                    res_o = tmp2Xlen[63:32];
+                    res_o = mul_res_s[63:32];
                 end
             5'b01101:   //mulhu
                 begin
-                    tmp2Xlen = a_i * b_i;
-                    res_o = tmp2Xlen[63:32];
+                    res_o = mul_res_s[63:32];
                 end
+           
+           /*     Division not supported
+             
             5'b01110:   //div
                 begin
                     res_o = a_signed / b_signed;
@@ -123,13 +130,16 @@ module alu #(
                 begin
                     res_o = a_signed / b_signed;        //NIJE URADJENO
                 end
+                
+            */    
+                
             5'b10010:   //rol
                 begin
-                    res_o = (a_i << b_i) | (a_i >> ((DATA_WIDTH - b_i) & (DATA_WIDTH - 1))); //PROVERI I OPTIMIZUJ
+                    res_o = (a_i << b_i[4:0]) | (a_i >> ((DATA_WIDTH - b_i[4:0]))); // & (DATA_WIDTH - 1))); //PROVERI I OPTIMIZUJ
                 end
             5'b10011:   //ror
                 begin
-                    res_o = (a_i >> b_i) | (a_i << ((DATA_WIDTH - b_i) & (DATA_WIDTH - 1))); //PROVERI I OPTIMIZUJ
+                    res_o = (a_i >> b_i[4:0]) | (a_i << ((DATA_WIDTH - b_i[4:0]))); // & (DATA_WIDTH - 1))); //PROVERI I OPTIMIZUJ
                 end
             
             /*
@@ -198,11 +208,11 @@ module alu #(
                 end
             5'b11011:   //ctz
                 begin
-                    res_o = ctz_o;
+                    res_o = {26'b0,ctz_o};
                 end
             5'b11100:   //clz
                 begin
-                   res_o = clz_o;
+                   res_o = {26'b0,clz_o};
                 end
             5'b11101:   //sext.b
                 begin
@@ -235,6 +245,8 @@ module alu #(
         endcase
     end
 
+    assign zero_o = res_o == 32'b0 ? 1'b1 : 1'b0;
+
     clz_encoder #(.WIDTH_IN(DATA_WIDTH)) clz_0 (
                         .in(a_i),
                         .out(clz_o)
@@ -249,4 +261,12 @@ module alu #(
                         .in(a_i),
                         .out(cpop_o)
                     );
+                    
+     signed_mul smul(
+        .a_i(a_signed),
+        .b_i(b_signed),
+        .res_o(mul_res_s),
+        .clk(clk)
+     );
+     
 endmodule

@@ -34,6 +34,7 @@ module immediate (
                     end
                 end
             7'b0110111: // LUI, AUIPC
+                /*
                 begin
                     if(instruction_i[31] == 1'b0) begin
                         immediate_extended_o = {12'b000000000000, instruction_i[31:12]};
@@ -42,6 +43,9 @@ module immediate (
                         immediate_extended_o = {12'b111111111111, instruction_i[31:12]};
                     end
                 end
+                */
+                immediate_extended_o = {instruction_i[31:12],12'b000000000000};
+                
             7'b1101111: // JAL
                 begin
                     if(instruction_i[31] == 1'b0) begin
