@@ -11,6 +11,7 @@ module control_decoder(
         output reg[1:0] alu_2bit_op_o, // controls ALU operations for store, load and other
         output reg rs1_in_use_o, // if register rs1 is used in this instruction
         output reg rs2_in_use_o, // if register rs2 is used in this instruction
+        output reg stop_flag_o, // flag to show when the program is finished
         output reg pc_operand_o // mux control signal
     );
 
@@ -27,7 +28,8 @@ module control_decoder(
                 alu_2bit_op_o = 2'b10;
                 rs1_in_use_o = 1'b1;
                 rs2_in_use_o = 1'b1;
-                pc_operand_o  = 1'b0; 
+                pc_operand_o  = 1'b0;
+                stop_flag_o = 1'b0;
             end
         7'b0010011: // I type instructions
             begin
@@ -40,6 +42,7 @@ module control_decoder(
                 rs1_in_use_o = 1'b1;
                 rs2_in_use_o = 1'b0;
                 pc_operand_o  = 1'b0; 
+                stop_flag_o = 1'b0;
             end 
         7'b0000011: // Load instructions
             begin
@@ -52,6 +55,7 @@ module control_decoder(
                 rs1_in_use_o = 1'b1;
                 rs2_in_use_o = 1'b0;
                 pc_operand_o  = 1'b0; 
+                stop_flag_o = 1'b0;
             end
         7'b1100011: // B type instructions
             begin
@@ -64,6 +68,7 @@ module control_decoder(
                 rs1_in_use_o = 1'b1;
                 rs2_in_use_o = 1'b1;
                 pc_operand_o  = 1'b0; 
+                stop_flag_o = 1'b0;
             end
         7'b0100011: // S type instructions
             begin
@@ -83,6 +88,7 @@ module control_decoder(
                 rs1_in_use_o = 1'b1;
                 rs2_in_use_o = 1'b1;
                 pc_operand_o  = 1'b0; 
+                stop_flag_o = 1'b0;
             end
         7'b1100111: // JALR
             begin
@@ -95,6 +101,7 @@ module control_decoder(
                 rs1_in_use_o = 1'b1;
                 rs2_in_use_o = 1'b0;
                 pc_operand_o  = 1'b1; 
+                stop_flag_o = 1'b0;
             end
         7'b1101111: // JAL
             begin
@@ -107,6 +114,7 @@ module control_decoder(
                 rs1_in_use_o = 1'b0;
                 rs2_in_use_o = 1'b0;
                 pc_operand_o  = 1'b0;
+                stop_flag_o = 1'b0;
             end
         7'b0010111: // AUIPC
             begin
@@ -119,6 +127,7 @@ module control_decoder(
                 rs1_in_use_o = 1'b0;
                 rs2_in_use_o = 1'b0;
                 pc_operand_o  = 1'b1;  
+                stop_flag_o = 1'b0;
             end
         7'b0110111: // LUI
             begin
@@ -131,6 +140,20 @@ module control_decoder(
                 rs1_in_use_o = 1'b0;
                 rs2_in_use_o = 1'b0;
                 pc_operand_o  = 1'b0;   
+                stop_flag_o = 1'b0;
+            end
+        7'b1110011: // ECALL, EBREAK
+            begin
+                mem_to_reg_o = 1'b0;
+                data_mem_we_o = 4'b0000;
+                rd_we_o = 1'b0;
+                alu_src_b_o = 1'b0;
+                branch_o = 1'b0;
+                alu_2bit_op_o = 2'b00;
+                rs1_in_use_o = 1'b0;
+                rs2_in_use_o = 1'b0;
+                pc_operand_o  = 1'b0;
+                stop_flag_o = 1'b1;
             end
         default:
             begin
@@ -143,6 +166,7 @@ module control_decoder(
                 rs1_in_use_o = 1'b0;
                 rs2_in_use_o = 1'b0;
                 pc_operand_o  = 1'b0;
+                stop_flag_o = 1'b0;
             end
         endcase
     end

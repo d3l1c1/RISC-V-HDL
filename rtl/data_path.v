@@ -12,6 +12,7 @@ module data_path(
     input wire pc_operand_i,
     input wire jalr_operand_i,
     input wire [1:0] alu_inverters_i,
+    input wire stop_flag_i,
 
     // Outputs to controlpath
     output wire [31:0] instruction_o,
@@ -74,7 +75,7 @@ module data_path(
             pc_o <= 32'b0;
         end
         else begin
-            if(pc_en_i == 1'b1) begin
+            if(pc_en_i == 1'b1 || stop_flag_i == 1'b1) begin
                 pc_o <= mux_sel_o;
             end
         end

@@ -18,6 +18,7 @@ module control_path(
     output wire pc_operand_o,
     output wire jalr_operand_o,
     output wire [1:0]alu_inverters_o,
+    output wire stop_flag_o,
 
     // signals utilized in forwarding
     output wire[1:0] alu_forward_a_o,
@@ -35,7 +36,7 @@ module control_path(
 
     // control decoder
 
-    reg[36:0] id_ex_reg;
+    reg[37:0] id_ex_reg;
 
     wire mem_to_reg_s;
     wire[1:0] data_mem_we_s;
@@ -46,6 +47,7 @@ module control_path(
     wire rs1_in_use_s;
     wire rs2_in_use_s;
     wire pc_operand_s;
+    wire stop_flag_s;
     
     wire control_pass_s;
 
@@ -60,13 +62,14 @@ module control_path(
         .alu_2bit_op_o(alu_2bit_op_s),
         .rs1_in_use_o(rs1_in_use_s),
         .rs2_in_use_o(rs2_in_use_s),
-        .pc_operand_o(pc_operand_s)
+        .pc_operand_o(pc_operand_s),
+        .stop_flag_o(stop_flag_s)
     );
 
     always @(posedge clk) 
     begin
         if(rst_n == 1'b1) begin
-            id_ex_reg <= 36'b000000000000000000000000000000000000;
+            id_ex_reg <= 38'b00000000000000000000000000000000000000;
         end
         else begin
 
@@ -88,10 +91,11 @@ module control_path(
                 id_ex_reg[26:22] <= instruction_i[11:7]; // rd
                 id_ex_reg[31:27] <= instruction_i[19:15]; // rs1
                 id_ex_reg[36:32] <= instruction_i[24:20]; // rs2
+                id_ex_reg[37] <= stop_flag_s;
             end
             else
             begin
-                id_ex_reg <= 36'b000000000000000000000000000000000000;  
+                id_ex_reg <= 38'b00000000000000000000000000000000000000;  
             end
         end
 
@@ -103,7 +107,7 @@ module control_path(
     assign pc_next_sel_o = branch_condition_i & branch_s;
     assign if_id_flush_o = branch_condition_i & branch_s;
 
-    reg[8:0] ex_mem_reg;
+    reg[9:0] ex_mem_reg;
 
     forwarding_unit fwd_unit(
         .rs1_address_id_i(instruction_i[19:15]),
@@ -133,30 +137,32 @@ module control_path(
     always @(posedge clk) 
     begin
         if(rst_n == 1'b1) begin
-            ex_mem_reg <= 9'b000000000;
+            ex_mem_reg <= 10'b0000000000;
         end
         else begin
             ex_mem_reg[0] <= id_ex_reg[1]; // mem_to_reg
             ex_mem_reg[2:1] <= id_ex_reg[3:2]; // data_mem_we
             ex_mem_reg[3] <= id_ex_reg[4]; // rd_we
             ex_mem_reg[8:4] <= id_ex_reg[26:22]; // rd
+            ex_mem_reg[9] <= id_ex_reg[37]; // stop flag
         end
 
     end
 
 
-    reg[6:0] mem_wb_reg;
+    reg[7:0] mem_wb_reg;
 
 
     always @(posedge clk) 
     begin
         if(rst_n == 1'b1) begin
-            mem_wb_reg <= 7'b0000000;
+            mem_wb_reg <= 8'b00000000;
         end
         else begin
             mem_wb_reg[0] <= ex_mem_reg[0]; // mem_to_reg
             mem_wb_reg[5:1] <= ex_mem_reg[8:4]; // rd
             mem_wb_reg[6] <= ex_mem_reg[3]; // rd_we
+            mem_wb_reg[7] <= ex_mem_reg[9]; // stop flag
         end
 
     end
@@ -175,6 +181,7 @@ module control_path(
 
     assign rd_we_o = mem_wb_reg[6];
     assign mem_to_reg_o = mem_wb_reg[0];
+    assign stop_flag_o = mem_wb_reg[7];
 
     hazard_unit hzrd_unit(
         .rs1_address_id_i(instruction_i[19:15]),

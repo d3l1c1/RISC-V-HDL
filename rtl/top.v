@@ -14,6 +14,7 @@ module top(
     wire [31:0] instr_mem_read_s;
     wire if_id_en_s;
     wire if_id_flush_s;
+    wire stop_flag_s;
     wire [3:0] data_mem_we_s;
     wire [31:0] data_mem_address_s;
     wire [31:0] data_mem_write_s;
@@ -30,6 +31,7 @@ module top(
         .overflow_o(overflow_o),
         .zero_o(zero_o),
         .if_id_flush_o(if_id_flush_s),
+        .stop_flag_o(stop_flag_s),
         
         // CPU interface towards memories in top module
        
@@ -66,7 +68,7 @@ module top(
   
     bram_module #(
     .RAM_PERFORMANCE("LOW_LATENCY"), // Select "HIGH_PERFORMANCE" or "LOW_LATENCY" 
-    .INIT_FILE("")                        // Specify name/location of RAM initialization file if using one (leave blank if not)
+    .INIT_FILE("C:\\Users\\Win 10\\Desktop\\ftn\\projekat\\rtl\\project_zybo\\project_zybo.srcs\\sim_1\\new\\data_asm.v")                        // Specify name/location of RAM initialization file if using one (leave blank if not)
   ) data_memory (
     .addra(data_mem_address_s >> 2),   // Port A address bus, width determined from RAM_DEPTH
     .addrb(),   // Port B address bus, width determined from RAM_DEPTH

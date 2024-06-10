@@ -9,6 +9,7 @@ module cpu(
         output wire overflow_o,
         output wire zero_o,
         output wire if_id_flush_o,
+        output wire stop_flag_o,
         
         // CPU interface towards memories in top module
        
@@ -39,9 +40,11 @@ module cpu(
     wire pc_en_s;
     wire if_id_en_s;
     wire jalr_operand_s;
+    wire stop_flag_s;
     
     assign if_id_en_o = if_id_en_s;
     assign if_id_flush_o = if_id_flush_s;
+    assign stop_flag_o = stop_flag_s;
     
     data_path d_path( 
     // Inputs from top module
@@ -58,6 +61,7 @@ module cpu(
     .pc_operand_i(pc_operand_s),
     .jalr_operand_i(jalr_operand_s),
     .alu_inverters_i(alu_inverters_s),
+    .stop_flag_i(stop_flag_s),
 
     // Outputs to controlpath
     .instruction_o(instruction_s),
@@ -109,6 +113,7 @@ module cpu(
     .pc_operand_o(pc_operand_s),
     .jalr_operand_o(jalr_operand_s),
     .alu_inverters_o(alu_inverters_s),
+    .stop_flag_o(stop_flag_s),
 
     // signals utilized in forwarding
     .alu_forward_a_o(alu_forward_a_s),
